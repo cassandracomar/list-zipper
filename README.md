@@ -1,6 +1,4 @@
----
-title: Rust Zipper crate for Lists/Sequenceable Data
----
+# Rust Zipper crate for Lists/Sequenceable Data
 
 ![docs.rs](https://img.shields.io/docsrs/list-zipper)
 
