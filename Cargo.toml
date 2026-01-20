@@ -2,7 +2,7 @@
 name = "list-zipper"
 version = "0.1.0"
 edition = "2024"
-license = "GPLv3"
+license = "GPL-3.0-or-later"
 description = "a zipper data structure for sequenceable data types"
 
 [dependencies]
