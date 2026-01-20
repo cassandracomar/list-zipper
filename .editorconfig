@@ -1,0 +1,14 @@
+﻿; -*- coding: utf-8-unix -*-
+root = true
+
+[*]
+end_of_line = unix
+charset = utf-8
+indent_style = space
+indent_style = space
+
+[*.yaml]
+indent_size = 2
+
+[*.rs]
+indent_size = 4
