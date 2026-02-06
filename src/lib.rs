@@ -52,19 +52,19 @@ use std::{collections::VecDeque, fmt::Display};
 use itertools::Itertools;
 
 /// the classic functional data structure. it's like an iterator except that it needs to allocate.
-/// opening a `Zipper` over a sequence allows moving both forwards and backwards through it, arbitrarily.
-/// a `Zipper` can be opened over any sequenceable data -- e.g. a traversal over a tree works
+/// opening a [Zipper] over a sequence allows moving both forwards and backwards through it, arbitrarily.
+/// a [Zipper] can be opened over any sequenceable data -- e.g. a traversal over a tree works
 /// just as well as a list.
 ///
-/// `Iterator`s are usually more efficient because they can avoid allocating buffers to store references
-/// to the elements of the sequence -- in the worst case, the `Zipper` is allocating sufficient space for
-/// twice the length of the sequence. however, `Zipper`s are substantially more flexible, allowing iteration
+/// [Iterator]s are usually more efficient because they can avoid allocating buffers to store references
+/// to the elements of the sequence -- in the worst case, the [Zipper] is allocating sufficient space for
+/// twice the length of the sequence. however, [Zipper]s are substantially more flexible, allowing iteration
 /// in both directions and via aribitrary paths through the sequence.
 ///
-/// this particular `Zipper` has been turned into a ring. when the last element of the sequence is reached,
+/// this particular [Zipper] has been turned into a ring. when the last element of the sequence is reached,
 /// the next element is the first element of the sequence (and vice versa when iterating in reverse).
 ///
-/// generally, you construct a `Zipper` by calling `FromIterator::collect` on an `Iterator`.
+/// generally, you construct a [Zipper] by calling [Iterator::collect].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Zipper<T> {
     /// a stack for elements occurring later in the sequence.
@@ -109,7 +109,7 @@ fn pop_push<T>(pop: &mut VecDeque<T>, push: &mut VecDeque<T>) {
 }
 
 impl<T> Zipper<T> {
-    /// construct an empty `Zipper`
+    /// construct an empty [Zipper]
     pub fn new() -> Self {
         Self {
             forward: VecDeque::new(),
@@ -118,7 +118,7 @@ impl<T> Zipper<T> {
     }
 
     /// move the focus to the next element in the sequence, in the provided direction. this
-    /// function rotates back to the start of the sequence when `step` is called on
+    /// function rotates back to the start of the sequence when [Self::step] is called on
     /// the last element of the sequence.
     pub fn step(&mut self, dir: SequenceDirection) -> &mut Self {
         if self.size() == 0 {
@@ -131,24 +131,24 @@ impl<T> Zipper<T> {
         }
     }
 
-    /// advance the `Zipper` one step in the `Original` direction of the sequence.
+    /// advance the [Zipper] one step in the [SequenceDirection::Original] direction of the sequence.
     pub fn step_forwards(&mut self) -> &mut Self {
         self.step(SequenceDirection::Original)
     }
 
-    /// advance the `Zipper` one step in `Reverse` of the original sequence direction.
+    /// advance the [Zipper] one step in [SequenceDirection::Reverse] of the original sequence direction.
     pub fn step_backwards(&mut self) -> &mut Self {
         self.step(SequenceDirection::Reverse)
     }
 
-    /// get the number of elements in the `Zipper`
+    /// get the number of elements in the [Zipper]
     pub fn size(&self) -> usize {
         self.forward.len() + self.backward.len()
     }
 
     /// skip ahead in the sequence until we reach the first element that satisfies the provided predicate.
-    /// because `Zipper::step` circularizes the `Zipper`, we will eventually find the requested element.
-    /// this moves the `Zipper`'s focus to the requested element.
+    /// because [Zipper::step] circularizes the [Zipper], we will eventually find the requested element.
+    /// this moves the [Zipper]'s focus to the requested element.
     pub fn refocus(&mut self, mut p: impl FnMut(&T) -> bool) -> &mut Self {
         let mut counter = 0;
         while let Some(t) = self.step_forwards().focus()
@@ -161,9 +161,9 @@ impl<T> Zipper<T> {
     }
 
     /// skip back in the sequence until we reach the first element that satisfies the provided predicate.
-    /// because `Zipper::step` circularizes the `Zipper`, we will eventually find the requested element.
-    /// this moves the `Zipper`'s focus to the requested element. while this function works in the reverse
-    /// direction, it should yield the exact same zipper as `Zipper::refocus`.
+    /// because [Zipper::step] circularizes the [Zipper], we will eventually find the requested element.
+    /// this moves the [Zipper]'s focus to the requested element. while this function works in the reverse
+    /// direction, it should yield the exact same zipper as [Zipper::refocus].
     pub fn refocus_backwards(&mut self, mut p: impl FnMut(&T) -> bool) -> &mut Self {
         let mut counter = 0;
         while let Some(t) = self.step_backwards().focus()
@@ -206,8 +206,8 @@ impl<T> Zipper<T> {
 
     /// rotate the stack, counter to the direction of motion, into the stack matching the direction of motion, if necessary.
     /// this rotation is only required when the stack matching the direction of motion has run out of elements. we thus
-    /// circularize the `Zipper`, ensuring that we always have a next element in the appropriate direction, so long as the
-    /// `Zipper` itself is not empty.
+    /// circularize the [Zipper], ensuring that we always have a next element in the appropriate direction, so long as the
+    /// [Zipper] itself is not empty.
     fn rotate_stacks(&mut self, dir: SequenceDirection) -> &mut Self {
         match dir {
             SequenceDirection::Original if self.forward.is_empty() => self.reset_start(),
@@ -216,12 +216,12 @@ impl<T> Zipper<T> {
         }
     }
 
-    /// retrieve the element focused by the `Zipper`
+    /// retrieve the element focused by the [Zipper]
     pub fn focus(&self) -> Option<&T> {
         self.forward.front()
     }
 
-    /// take the next element focused by the `Zipper`
+    /// take the next element focused by the [Zipper]
     pub fn take_current_focus(&mut self) -> Option<T> {
         let next = self.forward.pop_front();
 
@@ -232,7 +232,7 @@ impl<T> Zipper<T> {
         next
     }
 
-    /// take the previous element focused by the `Zipper`
+    /// take the previous element focused by the [Zipper]
     pub fn take_previous_focus(&mut self) -> Option<T> {
         if self.backward.is_empty() {
             reset(&mut self.backward, &mut self.forward);
@@ -248,7 +248,7 @@ impl<T> Zipper<T> {
         self
     }
 
-    /// yield an `Iterator` that iterates in the order imposed by the original sequence but starting at the currently
+    /// yield an [Iterator] that iterates in the order imposed by the original sequence but starting at the currently
     /// focused element. the element following the last element of the original sequence is the first element of the
     /// sequence.
     pub fn iter(&'_ self) -> ZipperIter<'_, T> {
@@ -260,7 +260,7 @@ impl<T> Zipper<T> {
         }
     }
 
-    /// yield an `Iterator` that iterates in reverse over the original sequence but starting at the currently
+    /// yield an [Iterator] that iterates in reverse over the original sequence but starting at the currently
     /// focused element. the element following the first element of the original sequence is the last element of the
     /// sequence.
     pub fn reverse_iter(&'_ self) -> ZipperIter<'_, T> {
@@ -275,7 +275,18 @@ impl<T> Zipper<T> {
     /// get the ith element. positive numbers correspond to the original sequence direction and negative numbers
     /// correspond to the reverse direction.
     ///
-    /// `zipper.ith(0)` is the same as `zipper.focus()`
+    /// # Examples
+    ///
+    /// ```rust
+    /// use list_zipper::*;
+    ///
+    /// let mut zipper = (0..10)
+    ///   .into_iter()
+    ///   .collect::<Zipper<_>>();
+    /// assert_eq!(zipper.ith(0), zipper.focus());
+    /// assert_eq!(zipper.ith(-1).copied(), zipper.step(SequenceDirection::Reverse).focus().copied());
+    /// assert_eq!(zipper.ith(1).copied(), zipper.step(SequenceDirection::Original).focus().copied());
+    /// ```
     pub fn ith(&self, i: isize) -> Option<&T> {
         let count = self.size() as isize;
         let i = (if i < 0 { i + count } else { i }).rem_euclid(count) as usize;
@@ -298,7 +309,7 @@ impl<T> FromIterator<T> for Zipper<T> {
     }
 }
 
-/// an `Iterator` that yields the elements of the sequence the `Zipper` was opened over, starting with the currently
+/// an [Iterator] that yields the elements of the sequence the [Zipper] was opened over, starting with the currently
 /// focused element and continuing until all elements have been yielded. sequence ordering is preserved.
 pub struct ZipperIter<'a, T> {
     /// sequence state
